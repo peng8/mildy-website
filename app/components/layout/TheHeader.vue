@@ -6,9 +6,12 @@ const mobileOpen = ref(false)
 const scrolled = ref(false)
 const searchOpen = ref(false)
 
-// Ctrl/Cmd + K 打开搜索
+// Ctrl/Cmd + K 打开搜索（仅在非可编辑元素上触发，避免在表单/搜索框内误触）
 const onKeydown = (e: KeyboardEvent) => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    // 跳过 input/textarea/contenteditable 等可编辑区域
+    const target = e.target as HTMLElement | null
+    if (target?.matches('input, textarea, [contenteditable]')) return
     e.preventDefault()
     searchOpen.value = true
   }
@@ -28,6 +31,16 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
 
 // 路由变化时关闭移动菜单
 watch(() => route.fullPath, () => (mobileOpen.value = false))
+
+// 移动菜单焦点陷阱：打开时聚焦第一个导航项，关闭时恢复
+const mobileMenuEl = ref<HTMLElement | null>(null)
+watch(mobileOpen, async (open) => {
+  if (open) {
+    await nextTick()
+    const firstLink = mobileMenuEl.value?.querySelector<HTMLAnchorElement>('a')
+    firstLink?.focus()
+  }
+})
 
 const { locale, toggle, t, isZh, localePath } = useLocale()
 
@@ -171,6 +184,8 @@ const navList = computed(() =>
           class="flex h-10 w-10 items-center justify-center rounded-md lg:hidden"
           :class="scrolled || mobileOpen ? 'text-navy' : 'text-white'"
           :aria-label="isZh ? '菜单' : 'Menu'"
+          :aria-expanded="mobileOpen"
+          :aria-controls="mobile-menu"
           @click="mobileOpen = !mobileOpen"
         >
           <UiAppIcon :name="mobileOpen ? 'close' : 'menu'" :size="24" />
@@ -180,7 +195,7 @@ const navList = computed(() =>
 
     <!-- 移动菜单展开 -->
     <Transition name="mnav">
-      <div v-if="mobileOpen" class="lg:hidden">
+      <div v-if="mobileOpen" ref="mobileMenuEl" id="mobile-menu" class="lg:hidden">
         <nav class="wrap flex flex-col gap-1 pb-5 pt-2">
           <NuxtLink
             v-for="item in navList"

@@ -115,6 +115,8 @@ export default defineNuxtConfig({
       const pageRoutes = withLocales(staticPageRoutes).map(withTrailingSlash)
       const blogRoutes = withLocales(blogSlugs.map((s) => `/blog/${s}`)).map(withTrailingSlash)
       const productApiRoutes = allProducts.map((p) => `/api/products/${p.slug}`)
+      // 博客 API 预渲染为静态 JSON：客户端 $fetch 命中缓存文件（GitHub Pages 纯静态）
+      const blogApiRoutes = blogSlugs.map((s) => `/api/blog/${s}`)
       nitroConfig.prerender.routes.push(
         ...pageRoutes,
         ...productDetailRoutes,
@@ -122,6 +124,8 @@ export default defineNuxtConfig({
         ...blogRoutes,
         ...productListApiRoutes,
         ...productApiRoutes,
+        '/api/blog',
+        ...blogApiRoutes,
         '/api/products/search-index',
         '/404.html'
       )

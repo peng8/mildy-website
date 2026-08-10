@@ -24,7 +24,15 @@ const benefits = computed(() =>
   <section class="section relative overflow-hidden bg-navy-900">
     <!-- 背景装饰 -->
     <div class="absolute inset-0 opacity-30">
-      <img src="/images/hero/global-export.jpeg" alt="" class="h-full w-full object-cover" loading="lazy" />
+      <NuxtImg
+        :src="'/images/hero/global-export.jpeg'"
+        alt=""
+        class="h-full w-full object-cover"
+        loading="lazy"
+        format="webp"
+        quality="80"
+        sizes="xs:100vw sm:100vw md:100vw lg:100vw xl:100vw xxl:100vw"
+      />
       <div class="absolute inset-0 hero-overlay" />
     </div>
 

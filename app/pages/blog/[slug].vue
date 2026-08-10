@@ -1,7 +1,11 @@
 <script setup lang="ts">
 // 博客文章详情页 —— 正文渲染 + 内嵌询价表单 CTA + 相关文章
-// 文章由 @nuxt/content 读取（content/blog/*.md），中文页复用同一份英文正文，
-// 仅在外层 UI 语言与 meta（titleZh/descriptionZh，无则回退英文）上区分。
+// 文章由服务端 API 读取（server/api/blog/[slug].get.ts 内部走 @nuxt/content 的
+// queryCollection → Nitro 服务端 DB），客户端仅 $fetch 静态 JSON / SSG payload。
+// 为什么不用 queryCollection 直接查询：@nuxt/content v3 的客户端查询会懒加载
+// sqlite-wasm 运行时（~440KB：DBoOAqdD + sqlite3-worker + opfs proxy），
+// 在 SPA 导航到博客页时触发下载，白白拖慢首屏。走 API + SSG 预渲染后
+// 客户端任何路径都不再触碰 sqlite，与产品列表页的模式完全一致。
 import type { BlogPost } from '~/data/blog'
 import { getBlogCategoryName } from '~/data/blog'
 import { SITE_URL, site } from '~/data/site'
@@ -13,19 +17,25 @@ const { isZh, localePath } = useLocale()
 // trailingSlash 开启后 route.path 以 / 结尾，需一并去掉以匹配内容库的裸路径（/blog/<slug>）
 const stripLocale = (p: string) => p.replace(/^\/zh(?=\/|$)/, '').replace(/\/+$/, '') || '/'
 
-// 取文章：按 path 精确匹配（/blog/<slug>），中文页请求的是同一个 path
-const articlePath = computed(() => stripLocale(route.path))
+// 取文章：按 slug 匹配，中文页请求同一个 API（正文中英共用）
+const slug = computed(() => stripLocale(route.path).replace(/^\/blog\//, '') || '')
 
-const { data: article, pending } = await useAsyncData<BlogPost | null>(
-  `blog-article-${articlePath.value}`,
-  () => queryCollection<BlogPost>('blog').where('path', '=', articlePath.value).first().then((a) => a ?? null),
-  { watch: [articlePath], default: () => null }
+// 文章对象带 @nuxt/content 的 body（ProseMarkdown/ProseMirror JSON），ContentRenderer 消费。
+// 返回类型由服务端 API 保证包含 BlogPost 字段 + body。
+interface BlogArticle extends BlogPost {
+  body: unknown
+}
+
+const { data: article, pending } = await useAsyncData<BlogArticle | null>(
+  `blog-article-${slug.value}`,
+  () => (slug.value ? $fetch<BlogArticle>(`/api/blog/${slug.value}`) : Promise.resolve(null)),
+  { watch: [slug], default: () => null }
 )
 
-// 同分类相关文章（排除当前篇，最多 3 篇）
-const { data: allPosts } = await useAsyncData(
+// 同分类相关文章（排除当前篇，最多 3 篇）—— 复用列表 API，客户端不加载 sqlite
+const { data: allPosts } = await useAsyncData<BlogPost[]>(
   'blog-posts-related',
-  () => queryCollection<BlogPost>('blog').order('date', 'DESC').all(),
+  () => $fetch<BlogPost[]>('/api/blog'),
   { default: () => [] }
 )
 const relatedPosts = computed(() => {

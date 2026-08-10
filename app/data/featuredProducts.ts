@@ -61,7 +61,7 @@ export const featuredProducts: ProductCardItem[] = [
     nameZh: '1000mg NAD+ 液体滴剂(含 PQQ)-细胞能量',
     category: 'liquid-drops',
     cover: 'https://img.mildy-health.com/products/m0_xo_wuxou4yvvflxv6xw7c0jcbjh.jpg',
-    shortDesc: 'This is a 1000 mg NAD+ liquid with PQQ made to boost cellular energy. The liquid form is easy to take and absorbs fast, while PQQ supports mitochondrial',
+    shortDesc: 'This is a 1000 mg NAD+ liquid with PQQ made to boost cellular energy. The liquid form is easy to take and absorbs fast, while PQQ supports mitochondrial function for better energy.',
     shortDescZh: '这是一款含有1000毫克NAD+和PQQ的液体产品，旨在提升细胞能量。液体形式服用方便，吸收迅速，PQQ则有助于支持线粒体功能。',
     moq: '500 bottles'
   },
@@ -81,7 +81,7 @@ export const featuredProducts: ProductCardItem[] = [
     nameZh: '皮质醇健康软糖',
     category: 'gummies',
     cover: 'https://img.mildy-health.com/products/m43182_1782872448286-47.jpg',
-    shortDesc: 'Natural cortisol management gummies with adaptogenic herbs, supporting healthy cortisol levels, reducing stress and anxiety, improving sleep quality, and',
+    shortDesc: 'Natural cortisol management gummies with adaptogenic herbs, supporting healthy cortisol levels, reducing stress and anxiety, improving sleep quality, and promoting overall stress resilience.',
     shortDescZh: '含有适应原草药的天然皮质醇管理软糖，有助于维持健康的皮质醇水平，减轻压力和焦虑，改善睡眠质量。',
     moq: '500 bottles'
   }

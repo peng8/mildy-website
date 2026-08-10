@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // 博客列表页 —— 文章横向行列表（左封面 + 右介绍）+ 分类文本筛选
-// 文章由 @nuxt/content 读取（content/blog/*.md），SSG 静态 HTML 已含全部行；
-// 分类筛选是纯客户端过滤（行本身是静态的，只是显隐），不影响爬虫收录。
+// 文章由服务端 API 读取（server/api/blog/index.get.ts 内部走 @nuxt/content 的
+// queryCollection → Nitro 服务端 DB），客户端仅 $fetch 静态 JSON / SSG payload，
+// 避免 SPA 导航时加载 sqlite-wasm 运行时（详见 blog/[slug].vue 注释）。
 import type { BlogPost } from '~/data/blog'
 import { blogCategories } from '~/data/blog'
 import { SITE_URL } from '~/data/site'
@@ -11,7 +12,7 @@ const { t, isZh, localePath } = useLocale()
 // 全部文章按日期倒序（最新在前）
 const { data: posts } = await useAsyncData(
   'blog-posts',
-  () => queryCollection<BlogPost>('blog').order('date', 'DESC').all(),
+  () => $fetch<BlogPost[]>('/api/blog'),
   { default: () => [] }
 )
 

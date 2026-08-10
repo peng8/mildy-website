@@ -318,6 +318,8 @@ const formatSpecLabel = (label: string) => {
               :key="i"
               class="overflow-hidden rounded-lg bg-mist-dark ring-2 transition-all"
               :class="i === activeImg ? 'ring-gold' : 'ring-transparent hover:ring-mist-border'"
+              :aria-label="isZh ? `查看第 ${i + 1} 张` : `View image ${i + 1}`"
+              :aria-current="i === activeImg ? 'true' : undefined"
               @click="activeImg = i"
             >
               <UiLazyImage :src="img" :alt="`${isZh ? product.nameZh ?? product.name : product.name} ${i + 1}`" ratio="aspect-square" class="transition-transform duration-500 hover:scale-105" />

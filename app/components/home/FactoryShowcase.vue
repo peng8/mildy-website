@@ -2,7 +2,7 @@
 import type { MessageKey } from '~/i18n/messages'
 import { site } from '~/data/site'
 
-const { t, localePath } = useLocale()
+const { t, localePath, isZh } = useLocale()
 
 const facilityStats = computed(() => [
   { value: '20,000', label: t('fs.stat1'), icon: 'box' },
@@ -18,10 +18,13 @@ const highlights = computed(() => [
 
 const { openOne } = useLightbox()
 const mainImg = '/images/banner-frames/frame-02s.jpg'
-const midImages = [
-  { src: '/images/banner-frames/frame-08s.jpg', alt: 'Production line detail' },
-  { src: '/images/banner-frames/frame-13s.jpg', alt: 'Facility interior' }
-]
+// alt/caption 随语言本地化（中文用户看到中文描述，而非硬编码英文）
+const mainLabel = computed(() => (isZh.value ? 'MILDY 工厂全景' : 'MILDY factory overview'))
+const mainCaption = computed(() => (isZh.value ? 'MILDY 主要生产车间' : 'MILDY main manufacturing facility'))
+const midImages = computed(() => [
+  { src: '/images/banner-frames/frame-08s.jpg', alt: isZh.value ? '生产线细节' : 'Production line detail' },
+  { src: '/images/banner-frames/frame-13s.jpg', alt: isZh.value ? '车间内部' : 'Facility interior' }
+])
 </script>
 
 <template>
@@ -72,11 +75,11 @@ const midImages = [
       <div class="reveal grid grid-cols-2 gap-4">
         <button
           class="group col-span-2 overflow-hidden rounded-xl"
-          @click="openOne({ src: mainImg, alt: 'MILDY factory overview', caption: 'MILDY main manufacturing facility' })"
+          @click="openOne({ src: mainImg, alt: mainLabel, caption: mainCaption })"
         >
           <UiLazyImage
             :src="mainImg"
-            alt="MILDY factory overview"
+            :alt="mainLabel"
             ratio="aspect-[16/9]"
             class="transition-transform duration-700 group-hover:scale-105"
           />

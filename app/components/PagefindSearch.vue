@@ -119,6 +119,25 @@ const onKeydown = (e: KeyboardEvent) => {
     } else {
       close()
     }
+    return
+  }
+  // 焦点陷阱：Tab 在弹窗内循环（弹窗是唯一挂载于 body 的 search 弹窗）
+  if (e.key === 'Tab') {
+    const panel = panelEl.value
+    if (!panel) return
+    const focusable = panel.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusable.length === 0) return
+    const first = focusable[0]!
+    const last = focusable[focusable.length - 1]!
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
   }
 }
 
