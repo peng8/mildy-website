@@ -12,6 +12,11 @@ const LOCALES = ['en', 'zh'] as const
 const withLocales = (bareRoutes: string[]) =>
   LOCALES.flatMap((l) => bareRoutes.map((r) => l === 'en' ? r : `/${l}${r === '/' ? '' : r}`))
 
+// 统一加尾斜杠：GitHub Pages 会把 /products/xxx 301 到 /products/xxx/，
+// sitemap / canonical / hreflang / 预渲染路由必须与线上实际返回的 URL 完全一致，
+// 否则 Google 顺着 sitemap 访问撞上 301 会判定「无法识别此网址」（见产品页收录问题）。
+const withTrailingSlash = (r: string) => (r === '/' ? '/' : `${r}/`)
+
 // 博客文章 slug 列表（content/blog/*.md 文件名）—— 构建期读取，驱动 SSG 预渲染与 sitemap。
 // 文件不存在时（首次检出未装依赖前）静默回退空数组，避免构建崩溃。
 const blogSlugs = (() => {
@@ -74,9 +79,9 @@ const buildDate = (() => {
 
 const sitemapEntries = (locale: typeof LOCALES[number]) =>
   canonicalBareRoutes.map((route) => {
-    const loc = locale === 'en' ? route : route === '/' ? '/zh' : `/zh${route}`
-    const enHref = route
-    const zhHref = route === '/' ? '/zh' : `/zh${route}`
+    const loc = locale === 'en' ? withTrailingSlash(route) : route === '/' ? '/zh/' : withTrailingSlash(`/zh${route}`)
+    const enHref = withTrailingSlash(route)
+    const zhHref = route === '/' ? '/zh/' : withTrailingSlash(`/zh${route}`)
 
     return {
       loc,
@@ -104,10 +109,11 @@ export default defineNuxtConfig({
     'nitro:config': (nitroConfig) => {
       nitroConfig.prerender ||= {}
       nitroConfig.prerender.routes ||= []
-      const productDetailRoutes = withLocales(allProducts.map((p) => `/products/${p.slug}`))
-      const listRoutes = withLocales(productListRoutes)
-      const pageRoutes = withLocales(staticPageRoutes)
-      const blogRoutes = withLocales(blogSlugs.map((s) => `/blog/${s}`))
+      // 预渲染路由统一带尾斜杠（与 sitemap/canonical 一致，避免 GitHub Pages 301）
+      const productDetailRoutes = withLocales(allProducts.map((p) => `/products/${p.slug}`)).map(withTrailingSlash)
+      const listRoutes = withLocales(productListRoutes).map(withTrailingSlash)
+      const pageRoutes = withLocales(staticPageRoutes).map(withTrailingSlash)
+      const blogRoutes = withLocales(blogSlugs.map((s) => `/blog/${s}`)).map(withTrailingSlash)
       const productApiRoutes = allProducts.map((p) => `/api/products/${p.slug}`)
       nitroConfig.prerender.routes.push(
         ...pageRoutes,
@@ -135,6 +141,10 @@ export default defineNuxtConfig({
     ],
     defaultLocale: 'en',
     strategy: 'prefix_except_default', // 英文默认不带前缀，中文使用 /zh
+    // 全站统一尾斜杠：让 localePath() 生成的路由、canonical/hreflang/og:url 都以 / 结尾，
+    // 与 GitHub Pages 实际返回的 URL（/products/xxx → 301 → /products/xxx/）对齐，
+    // 避免 Google 顺着 sitemap 访问裸路径时撞上 301 而判定「无法识别」。
+    trailingSlash: true,
     // 翻译文案统一来自 i18n/i18n.config.ts（复用原 messages.ts，保持 MessageKey 类型）
     vueI18n: '~/i18n/i18n.config.ts',
     // 默认入口固定到英文，中文页面仅通过 /zh/... 访问，避免浏览器语言把 / 自动导向中文。
@@ -145,7 +155,10 @@ export default defineNuxtConfig({
   // 站点绝对地址 —— sitemap / canonical / og:url 的统一基准（SEO 必需）
   site: {
     url: 'https://www.mildy-health.com',
-    name: 'MILDY Health'
+    name: 'MILDY Health',
+    // 全站统一尾斜杠：@nuxtjs/sitemap 通过 fixSlashes(siteConfig.trailingSlash, ...)
+    // 为 sitemap 的 <loc>/hreflang 追加 /，与 GitHub Pages 实际返回的 URL 对齐。
+    trailingSlash: true
   },
 
   // 自动生成 sitemap.xml + robots.txt（@nuxtjs/i18n 与 @nuxtjs/sitemap 原生集成，自动输出 hreflang）

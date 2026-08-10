@@ -142,11 +142,11 @@ useHead({
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: zh ? '首页' : 'Home', item: `${SITE_URL}${localePrefix}/` },
-        { '@type': 'ListItem', position: 2, name: zh ? '产品中心' : 'Products', item: `${SITE_URL}${localePrefix}/products` },
+        { '@type': 'ListItem', position: 2, name: zh ? '产品中心' : 'Products', item: `${SITE_URL}${localePrefix}/products/` },
         ...(cat
-          ? [{ '@type': 'ListItem', position: 3, name: cn, item: `${SITE_URL}${localePrefix}/products/categories/${cat.slug}` },
-             { '@type': 'ListItem', position: 4, name: pn, item: `${SITE_URL}${localePrefix}/products/${p.slug}` }]
-          : [{ '@type': 'ListItem', position: 3, name: pn, item: `${SITE_URL}${localePrefix}/products/${p.slug}` }])
+          ? [{ '@type': 'ListItem', position: 3, name: cn, item: `${SITE_URL}${localePrefix}/products/categories/${cat.slug}/` },
+             { '@type': 'ListItem', position: 4, name: pn, item: `${SITE_URL}${localePrefix}/products/${p.slug}/` }]
+          : [{ '@type': 'ListItem', position: 3, name: pn, item: `${SITE_URL}${localePrefix}/products/${p.slug}/` }])
       ]
     }
     // FAQ schema：覆盖买家最常问的询盘问题，利于 Google 富摘要（与页面可见 FAQ 共用 faqs 数据源）

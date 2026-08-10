@@ -10,7 +10,8 @@ const route = useRoute()
 const { isZh, localePath } = useLocale()
 
 // 去掉 /zh 前缀得到裸路径（英文为裸路径无前缀），与 TheHeader 的 stripLocale 逻辑一致
-const stripLocale = (p: string) => p.replace(/^\/zh(?=\/|$)/, '') || '/'
+// trailingSlash 开启后 route.path 以 / 结尾，需一并去掉以匹配内容库的裸路径（/blog/<slug>）
+const stripLocale = (p: string) => p.replace(/^\/zh(?=\/|$)/, '').replace(/\/+$/, '') || '/'
 
 // 取文章：按 path 精确匹配（/blog/<slug>），中文页请求的是同一个 path
 const articlePath = computed(() => stripLocale(route.path))
