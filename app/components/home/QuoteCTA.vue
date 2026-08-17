@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { site } from '~/data/site'
+import { trackEvent } from '~/composables/useAnalytics'
 
 const { t, isZh } = useLocale()
 
@@ -61,7 +62,7 @@ const benefits = computed(() =>
           <a :href="`mailto:${site.contact.email}`" class="flex items-center gap-2 text-sm text-white/80 hover:text-gold-light">
             <UiAppIcon name="mail" :size="18" class="text-gold" /> {{ site.contact.email }}
           </a>
-          <a :href="site.contact.whatsappHref" target="_blank" rel="noopener" class="flex items-center gap-2 text-sm text-white/80 hover:text-gold-light">
+          <a :href="site.contact.whatsappHref" target="_blank" rel="noopener" class="flex items-center gap-2 text-sm text-white/80 hover:text-gold-light" @click="trackEvent('whatsapp_click', { placement: 'home' })">
             <UiAppIcon name="whatsapp" :size="18" class="text-gold" /> WhatsApp
           </a>
         </div>

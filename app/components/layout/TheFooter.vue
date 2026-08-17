@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { site, navItems, navKeyMap } from '~/data/site'
+import { trackEvent } from '~/composables/useAnalytics'
 
 const { t, isZh, localePath } = useLocale()
 
@@ -103,7 +104,7 @@ const localizedNav = computed(() =>
             </a>
           </li>
           <li>
-            <a :href="site.contact.whatsappHref" target="_blank" rel="noopener" class="flex items-center gap-3 transition-colors hover:text-gold-light">
+            <a :href="site.contact.whatsappHref" target="_blank" rel="noopener" class="flex items-center gap-3 transition-colors hover:text-gold-light" @click="trackEvent('whatsapp_click', { placement: 'footer' })">
               <UiAppIcon name="whatsapp" :size="18" class="text-gold" />
               {{ t('footer.whatsapp') }}
             </a>

@@ -8,6 +8,7 @@ import { productImageUrl } from '~/data/productImageUrl'
 import { normalizeSearchText } from '~/data/searchUtils'
 import type { ProductCardItem, ProductListResponse } from '~/data/products-types'
 import { PRODUCT_PAGE_SIZE, productListApiPath, productPageUrl } from '~/composables/useProducts'
+import { trackEvent } from '~/composables/useAnalytics'
 import { SITE_URL } from '~/data/site'
 
 const props = withDefaults(
@@ -137,6 +138,18 @@ const clearSearch = () => {
   searchError.value = false
 }
 
+// 搜索是实时过滤（无提交按钮），防抖后再上报一次，避免每个字符都发一条事件
+let searchTrackTimer: ReturnType<typeof setTimeout> | null = null
+const scheduleSearchTracking = (term: string) => {
+  if (searchTrackTimer) clearTimeout(searchTrackTimer)
+  searchTrackTimer = setTimeout(() => {
+    trackEvent('search', {
+      search_term: term,
+      search_source: 'products'
+    })
+  }, 800)
+}
+
 // 筛选项：「全部」+ 6 大剂型（按当前语言切换显示名）
 const filters = computed(() => [
   { slug: 'all', name: t('nav.allProducts') },
@@ -247,6 +260,13 @@ watch(
 watch(searchQuery, () => {
   searchPage.value = 1
   if (isSearching.value) ensureSearchIndex()
+  // 防抖上报搜索关键词到 GA4（用户稳定输入后触发一次）
+  const term = searchQuery.value.trim()
+  if (term) scheduleSearchTracking(term)
+})
+
+onBeforeUnmount(() => {
+  if (searchTrackTimer) clearTimeout(searchTrackTimer)
 })
 
 // 搜索/翻页是客户端原地更新（路由不变），布局里的 reveal 观察不会重跑，

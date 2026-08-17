@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { processSteps } from '~/data/process'
+import { trackEvent } from '~/composables/useAnalytics'
 
 const { t, isZh, localePath } = useLocale()
 
@@ -167,6 +168,7 @@ useHead({
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-outline"
+            @click="trackEvent('whatsapp_click', { placement: 'how_it_works' })"
           >
             <UiAppIcon name="whatsapp" :size="18" />{{ t('howItWorks.cta.whatsapp') }}
           </a>

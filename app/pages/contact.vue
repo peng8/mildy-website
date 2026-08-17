@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { site, SITE_URL } from '~/data/site'
+import { trackEvent } from '~/composables/useAnalytics'
 
 const { t, isZh, localePath } = useLocale()
 
@@ -25,6 +26,11 @@ const contactMethods = [
   { icon: 'phone', key: '3', value: site.contact.phone, href: site.contact.phoneHref, valueParams: { phone: site.contact.phone, hours: site.contact.hours } },
   { icon: 'pin', key: '4', value: null, href: null, valueParams: { address: isZh.value ? site.contact.addressCn : site.contact.address } }
 ]
+
+// 联系方式卡片点击埋点 —— 目前只关心 WhatsApp（跳转到 wa.me）
+const trackContactClick = (method: { icon: string }) => {
+  if (method.icon === 'whatsapp') trackEvent('whatsapp_click', { placement: 'contact' })
+}
 
 // ContactPage + Organization 结构化数据（地址/电话/坐标/sameAs 已存在于 site.ts，用于本地/公司实体识别）
 useHead({
@@ -103,6 +109,7 @@ useHead({
                     :is="method.href ? 'a' : 'p'"
                     v-bind="method.href ? { href: method.href, target: method.href.startsWith('http') ? '_blank' : undefined, rel: 'noopener noreferrer' } : {}"
                     class="mt-1 text-base font-semibold text-navy-500 transition-colors hover:text-navy"
+                    @click="trackContactClick(method)"
                   >
                     {{ t(`contact.method.${method.key}.value`, method.valueParams) }}
                   </component>

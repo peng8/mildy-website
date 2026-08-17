@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { trackEvent } from '~/composables/useAnalytics'
 // 全站搜索弹窗 —— 基于 Pagefind 静态索引
 // 索引由 Pagefind 在构建时扫描 .output/public 生成，运行时纯客户端搜索
 // 用法：<PagefindSearch v-model:open="open" />
@@ -88,6 +89,8 @@ const runSearch = async () => {
     loading.value = false
     return
   }
+  // 埋点：记录客户在站内搜索弹窗搜了什么（onInput 已防抖 220ms，这里一次搜索触发一次）
+  trackEvent('search', { search_term: q, search_source: 'modal' })
   const pf = await loadPagefind()
   if (!pf) {
     loading.value = false
