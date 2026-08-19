@@ -24,6 +24,7 @@ export const blogCategories: { slug: string; name: string; nameZh: string }[] = 
   { slug: 'compliance', name: 'Compliance', nameZh: '法规' },
   { slug: 'manufacturing', name: 'Manufacturing', nameZh: '制造' },
   { slug: 'ingredients', name: 'Ingredients', nameZh: '成分' },
+  { slug: 'supplements', name: 'Supplements', nameZh: '补充剂' },
   { slug: 'wellness', name: 'Wellness', nameZh: '健康' }
 ]
 
