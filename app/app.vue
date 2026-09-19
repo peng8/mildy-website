@@ -33,7 +33,11 @@ onMounted(() => {
   const loadAnalytics = () => {
     if (document.querySelector(`script[src*="googletagmanager.com/gtag/js?id=${gaId}"]`)) return
     w.dataLayer = w.dataLayer || []
-    w.gtag = (...args: unknown[]) => w.dataLayer?.push(args)
+    // 官方 stub 语义：gtag.js 只认 arguments 对象格式的命令，push 真数组会被静默忽略，
+    // 导致 config 不生效、GA4 收不到任何数据（2026-07-28~09-19 数据归零的根因）
+    w.gtag = function () {
+      w.dataLayer?.push(arguments as unknown as unknown[])
+    }
     w.gtag('js', new Date())
     w.gtag('config', gaId)
     const script = document.createElement('script')
